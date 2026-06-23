@@ -1,0 +1,43 @@
+05:34:30 | INFO     | src.loader | Loaded TXT: sample.txt (1 documents)
+05:34:30 | INFO     | src.loader | Total: 1 pages/documents loaded from /tmp/pytest-of-niltonpegass/pytest-0/test_load_documents_txt0
+05:34:30 | INFO     | src.loader | Total: 0 pages/documents loaded from /tmp/pytest-of-niltonpegass/pytest-0/test_load_documents_empty_fold0
+05:34:30 | INFO     | src.loader | Total: 0 pages/documents loaded from /tmp/pytest-of-niltonpegass/pytest-0/test_load_documents_unsupporte0
+05:34:30 | INFO     | src.loader | Loaded TXT: sample.txt (1 documents)
+05:34:30 | INFO     | src.loader | Total: 1 pages/documents loaded from /tmp/pytest-of-niltonpegass/pytest-0/test_load_documents_metadata0
+05:34:30 | INFO     | src.loader | Split into 6 chunks (size=500, overlap=50)
+05:34:30 | INFO     | src.loader | Split into 12 chunks (size=500, overlap=50)
+05:34:30 | INFO     | src.loader | Split into 3 chunks (size=500, overlap=50)
+05:34:30 | INFO     | src.loader | Split into 0 chunks (size=500, overlap=50)
+05:34:51 | INFO     | src.agent | [router] no chunks found → retrying
+05:34:51 | WARNING  | src.agent | [router] no chunks after 2 attempts → fallback
+05:34:51 | WARNING  | src.agent | [router] no chunks after 2 attempts → fallback
+05:38:06 | INFO     | __main__ | Starting RAG agent (Phase 2) — model=llama3.2
+05:38:06 | INFO     | src.vectorstore | Vector store is empty — indexing documents...
+05:38:06 | INFO     | src.loader | Total: 0 pages/documents loaded from /home/niltonpegass/Documents/repositorio_local/rag_ollama_langchain_mod/docs
+05:38:06 | INFO     | src.loader | Split into 0 chunks (size=500, overlap=50)
+05:38:06 | WARNING  | src.vectorstore | No documents found — vector store remains empty
+05:38:06 | INFO     | src.retriever | Retriever ready — k=6, threshold=0.2
+05:38:06 | INFO     | src.agent | Agent compiled — model=llama3.2, max_retries=2
+05:38:23 | INFO     | src.agent | [retriever] 0 chunks above threshold
+05:38:23 | INFO     | src.agent | [router] no chunks found → retrying
+05:38:24 | INFO     | src.agent | [retriever] 0 chunks above threshold
+05:38:24 | WARNING  | src.agent | [router] no chunks after 2 attempts → fallback
+05:38:24 | WARNING  | src.agent | [fallback] no relevant chunks after 2 attempts
+05:39:12 | INFO     | __main__ | Starting RAG chain (Phase 1)
+05:39:12 | INFO     | src.vectorstore | Vector store is empty — indexing documents...
+05:39:12 | INFO     | src.loader | Loaded PDF: Currículo de Nilton Pegas.pdf (3 pages)
+05:39:12 | INFO     | src.loader | Loaded PDF: Nilton Pegas CV.pdf (3 pages)
+05:39:12 | INFO     | src.loader | Loaded TXT: anotacoes.txt (1 documents)
+05:39:12 | INFO     | src.loader | Loaded TXT: arianna.txt (1 documents)
+05:39:12 | INFO     | src.loader | Loaded TXT: nilton.txt (1 documents)
+05:39:12 | INFO     | src.loader | Loaded TXT: pamela.txt (1 documents)
+05:39:12 | INFO     | src.loader | Total: 10 pages/documents loaded from /home/niltonpegass/Documents/repositorio_local/rag_ollama_langchain_mod/docs
+05:39:12 | INFO     | src.loader | Split into 42 chunks (size=500, overlap=50)
+05:39:23 | INFO     | src.vectorstore | Indexed 42 chunks and persisted to /home/niltonpegass/Documents/repositorio_local/rag_ollama_langchain_mod/vectorstore
+05:39:23 | INFO     | src.chain | RAG chain ready — model=llama3.2
+05:39:39 | INFO     | __main__ | Starting RAG agent (Phase 2) — model=llama3.2
+05:39:39 | INFO     | src.vectorstore | Loaded existing vector store (42 chunks) from /home/niltonpegass/Documents/repositorio_local/rag_ollama_langchain_mod/vectorstore
+05:39:39 | INFO     | src.retriever | Retriever ready — k=6, threshold=0.2
+05:39:39 | INFO     | src.agent | Agent compiled — model=llama3.2, max_retries=2
+05:40:05 | INFO     | src.agent | [retriever] 5 chunks above threshold
+05:40:33 | INFO     | src.agent | [generator] answer generated
