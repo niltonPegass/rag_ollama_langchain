@@ -50,7 +50,7 @@ def _get_embeddings() -> OllamaEmbeddings:
     return OllamaEmbeddings(model=EMBEDDING_MODEL)
 
 
-def build_vectorstore(docs_dir: Optional[Path] = None) -> Chroma:
+def build_vectorstore(docs_dir: Optional[Path] = None, force_retrain: bool = False) -> Chroma:
     """
     Build or load the ChromaDB vector store.
 
@@ -59,10 +59,19 @@ def build_vectorstore(docs_dir: Optional[Path] = None) -> Chroma:
 
     Args:
         docs_dir: override the default DOCS_DIR from config (useful for testing)
+        force_retrain: if True, clear the existing vector store and rebuild it
 
     Returns:
         Chroma vector store instance ready for retrieval
     """
+    if force_retrain and VECTORSTORE_DIR.exists():
+        import shutil
+        log.info(f"Retraining requested — clearing vector store directory {VECTORSTORE_DIR}...")
+        try:
+            shutil.rmtree(VECTORSTORE_DIR, ignore_errors=True)
+        except Exception as e:
+            log.warning(f"Failed to delete vector store directory: {e}")
+
     embeddings  = _get_embeddings()
     vectorstore = Chroma(
         collection_name=CHROMA_COLLECTION,
