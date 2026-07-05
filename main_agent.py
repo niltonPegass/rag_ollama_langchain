@@ -24,24 +24,29 @@ from src.agent import build_agent
 log = get_logger(__name__)
 
 
-def select_model() -> str:
-    """Prompt the user to select an LLM model at startup."""
+def select_model_and_retrain() -> tuple[str, bool]:
+    """Prompt the user to select an LLM model and ask if they want to retrain the RAG database."""
     options = ", ".join(AVAILABLE_LLMS)
     choice  = input(f"Choose model ({options}) [default: {DEFAULT_LLM}]: ").strip()
 
     if choice not in AVAILABLE_LLMS:
         if choice:
             print(f"Unknown model '{choice}' — using default: {DEFAULT_LLM}")
-        return DEFAULT_LLM
+        model = DEFAULT_LLM
+    else:
+        model = choice
 
-    return choice
+    retrain_choice = input("Do you want to retrain the RAG database from the 'docs' folder? (y/N): ").strip().lower()
+    retrain = retrain_choice in ("y", "yes")
+
+    return model, retrain
 
 
 def main():
-    model = select_model()
+    model, retrain = select_model_and_retrain()
     log.info(f"Starting RAG agent (Phase 2) — model={model}")
 
-    vectorstore = build_vectorstore()
+    vectorstore = build_vectorstore(force_retrain=retrain)
     retriever   = build_retriever(vectorstore)
     agent       = build_agent(retriever, model=model)
 
