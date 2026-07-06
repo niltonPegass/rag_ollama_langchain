@@ -67,8 +67,8 @@ rag-langchain/
 │   ├── test_loader.py      ← tests for document loading and chunking
 │   ├── test_prompts.py     ← tests for prompt template rendering
 │   └── test_agent.py       ← tests for agent routing logic
-├── main_chain.py            ← entry point — Phase 1 (basic RAG chain)
-├── main_agent.py            ← entry point — Phase 2 (agentic RAG with LangGraph)
+├── main_chain.py           ← entry point — Phase 1 (basic RAG chain)
+├── main_agent.py           ← entry point — Phase 2 (agentic RAG with LangGraph)
 ├── diagnostics.py          ← vector store inspection utilities
 ├── pytest.ini              ← test configuration
 ├── requirements.txt
