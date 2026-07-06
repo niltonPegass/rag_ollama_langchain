@@ -1,4 +1,4 @@
-# RAG with LangChain, LangGraph, LangSmith & Langflow
+# RAG with Ollama (Llama3.2 // Mistral) + LangChain, LangGraph, LangSmith & Langflow
 
 A hands-on RAG (Retrieval-Augmented Generation) project built incrementally across four phases, covering the full LangChain ecosystem from a basic chain to an agentic pipeline with observability and a visual interface.
 
