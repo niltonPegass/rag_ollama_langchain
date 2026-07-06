@@ -43,16 +43,37 @@ Same pipeline reproduced via drag-and-drop interface
 
 ```
 rag-langchain/
-├── docs/               ← source documents (PDF, TXT)
-├── vectorstore/        ← ChromaDB persisted embeddings
-├── langflow_data/      ← Langflow database (flows, settings)
+├── docs/
+│   ├── personal/           ← documents with personal/profile data
+│   └── youtube/            ← summaries of YouTube video examples
+├── images/                 ← project screenshots and demo videos
+├── notes/                  ← learning guides and project documentation
 ├── flows/
-│   └── rag_ollama_langchain.json   ← exported Langflow pipeline
-├── .env                ← LangSmith API key (not committed)
+│   └── rag_ollama_langchain.json  ← exported Langflow pipeline
+├── langflow_data/          ← Langflow database (flows, settings)
+├── vectorstore/            ← ChromaDB persisted embeddings (auto-created)
+├── logs/                   ← structured log files (auto-created)
+├── src/
+│   ├── __init__.py         ← makes src/ a Python package
+│   ├── config.py           ← all settings in one place (models, paths, thresholds)
+│   ├── logger.py           ← structured logging to console and file
+│   ├── loader.py           ← document loading and chunking
+│   ├── vectorstore.py      ← ChromaDB build and load logic
+│   ├── retriever.py        ← retriever factory (search strategy)
+│   ├── prompts.py          ← all prompt templates centralized
+│   ├── chain.py            ← Phase 1: LCEL RAG chain
+│   └── agent.py            ← Phase 2: LangGraph nodes and graph assembly
+├── tests/
+│   ├── test_loader.py      ← tests for document loading and chunking
+│   ├── test_prompts.py     ← tests for prompt template rendering
+│   └── test_agent.py       ← tests for agent routing logic
+├── main_chain.py            ← entry point — Phase 1 (basic RAG chain)
+├── main_agent.py            ← entry point — Phase 2 (agentic RAG with LangGraph)
+├── diagnostics.py          ← vector store inspection utilities
+├── pytest.ini              ← test configuration
 ├── requirements.txt
-├── rag_chain.py        ← Phase 1: basic RAG chain
-├── rag_agent.py        ← Phase 2: agentic RAG with LangGraph
-└── diagnostics.py      ← vector store inspection utilities
+├── .env                    ← API keys
+└── .gitignore
 ```
 
 ---
