@@ -1,5 +1,11 @@
 # RAG with LangChain, LangGraph, LangSmith & Langflow
 
+<p align="center">
+  <a href="https://github.com/niltonPegass/rag_ollama_langchain" target="_blank">
+    <img src="images/RAG_langflow.mp4">
+  </a>
+</p>
+
 A hands-on RAG (Retrieval-Augmented Generation) project built incrementally across four phases, covering the full LangChain ecosystem from a basic chain to an agentic pipeline with observability and a visual interface.
 
 All inference runs **locally** via Ollama - no OpenAI API key or cloud costs required.
