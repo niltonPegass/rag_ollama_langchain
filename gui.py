@@ -105,26 +105,42 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Inject dynamic theme-based favicon swapping using JS
+# Inject dynamic theme-based favicon swapping and beforeunload handler using JS
 if dark_svg_b64 and light_svg_b64:
     js_code = f"""
     <script>
         const darkIcon = "data:image/svg+xml;base64,{dark_svg_b64}";
         const lightIcon = "data:image/svg+xml;base64,{light_svg_b64}";
         
+        function getWindow() {{
+            try {{
+                if (window.parent) return window.parent;
+            }} catch(e) {{}}
+            return window;
+        }}
+        
+        function getDocument() {{
+            try {{
+                if (window.parent && window.parent.document) return window.parent.document;
+            }} catch(e) {{}}
+            return document;
+        }}
+        
+        const targetWin = getWindow();
+        const targetDoc = getDocument();
+        
         function updateFavicon() {{
             try {{
-                const isDarkMode = window.parent.matchMedia && window.parent.matchMedia('(prefers-color-scheme: dark)').matches;
+                const isDarkMode = targetWin.matchMedia && targetWin.matchMedia('(prefers-color-scheme: dark)').matches;
                 const iconUrl = isDarkMode ? darkIcon : lightIcon;
                 
-                const parentDoc = window.parent.document;
-                let links = parentDoc.querySelectorAll("link[rel*='icon']");
+                let links = targetDoc.querySelectorAll("link[rel*='icon']");
                 
                 if (links.length === 0) {{
-                    const newLink = parentDoc.createElement('link');
+                    const newLink = targetDoc.createElement('link');
                     newLink.rel = 'icon';
                     newLink.href = iconUrl;
-                    parentDoc.head.appendChild(newLink);
+                    targetDoc.head.appendChild(newLink);
                 }} else {{
                     links.forEach(link => {{
                         link.href = iconUrl;
@@ -135,16 +151,28 @@ if dark_svg_b64 and light_svg_b64:
             }}
         }}
         
-        // Execute initially and set event listener
         updateFavicon();
-        if (window.parent.matchMedia) {{
-            window.parent.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateFavicon);
+        if (targetWin.matchMedia) {{
+            targetWin.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateFavicon);
         }}
+        
+        // Alert user on window close / tab leave to verify if models have been unloaded
+        const handleBeforeUnload = function (e) {{
+            e.preventDefault();
+            e.returnValue = 'Have you unloaded the models from RAM?';
+            return 'Have you unloaded the models from RAM?';
+        }};
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        try {{
+            if (targetWin !== window) {{
+                targetWin.addEventListener('beforeunload', handleBeforeUnload);
+            }}
+        }} catch(e) {{}}
     </script>
     """
-    components.html(js_code, height=0, width=0)
+    st.html(js_code, unsafe_allow_javascript=True)
 
-# Helper function to generate responsive SVG HTML matching theme color
+# Helper function to generate responsive SVG HTML matching theme color and center it
 def get_responsive_svg_html(file_path, width="60px"):
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -154,7 +182,12 @@ def get_responsive_svg_html(file_path, width="60px"):
         # Use currentColor so it automatically matches text colors in Streamlit theme
         svg_content = svg_content.replace('style="fill:white;"', 'style="fill:currentColor;"')
         svg_content = svg_content.replace('fill="white"', 'fill="currentColor"')
-        return f'<div style="width: {width}; color: var(--text-color);">{svg_content}</div>'
+        # Wrap SVG in centered flex container
+        return f'''
+        <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin-top: 5px; margin-bottom: 5px;">
+            <div style="width: {width}; color: var(--text-color);">{svg_content}</div>
+        </div>
+        '''
     except Exception as e:
         log.error(f"Error generating sidebar SVG: {e}")
         return ""
@@ -172,45 +205,47 @@ if "system_initialized" not in st.session_state:
     st.session_state.active_mode = None
 
 # Render responsive sidebar logo
-sidebar_logo_html = get_responsive_svg_html(ROOT_DIR / "icons" / "ollama-logo-dark.svg", width="60px")
+sidebar_logo_html = get_responsive_svg_html(ROOT_DIR / "icons" / "ollama-logo-dark.svg", width="100px")
 if sidebar_logo_html:
     st.sidebar.markdown(sidebar_logo_html, unsafe_allow_html=True)
 else:
-    st.sidebar.image(str(ROOT_DIR / "icons" / "ollama-logo-light.svg"), width=60)
+    st.sidebar.image(str(ROOT_DIR / "icons" / "ollama-logo-light.svg"), width=100)
 
-st.sidebar.markdown("<h2 style='margin-top: 10px;'>RAG Configuration</h2>", unsafe_allow_html=True)
+# Spacing between logo and expanders
+st.sidebar.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
 
-# 1. RAG Engine selection (selectbox list instead of radio checks)
-mode = st.sidebar.selectbox(
-    "Select RAG Engine:",
-    options=["Basic RAG Chain (main_chain)", "Agentic RAG (main_agent)"],
-    index=0,
-    help="Basic RAG: Simple linear flow. Agentic RAG: Stateful LangGraph agent with self-correction and search retries."
-)
+# RAG Configuration Expander
+with st.sidebar.expander("⚙️ RAG Configuration", expanded=False):
+    # 1. RAG Engine selection
+    mode = st.selectbox(
+        "Select RAG Engine:",
+        options=["Basic RAG Chain (main_chain)", "Agentic RAG (main_agent)"],
+        index=0,
+        help="Basic RAG: Simple linear flow. Agentic RAG: Stateful LangGraph agent with self-correction and search retries."
+    )
 
-# 2. Ollama model selection (selectbox list)
-model_choice = st.sidebar.selectbox(
-    "Ollama Model (LLM):",
-    options=AVAILABLE_LLMS,
-    index=AVAILABLE_LLMS.index(DEFAULT_LLM) if DEFAULT_LLM in AVAILABLE_LLMS else 0,
-    help="Available models installed locally via Ollama."
-)
+    # 2. Ollama model selection
+    model_choice = st.selectbox(
+        "Ollama Model (LLM):",
+        options=AVAILABLE_LLMS,
+        index=AVAILABLE_LLMS.index(DEFAULT_LLM) if DEFAULT_LLM in AVAILABLE_LLMS else 0,
+        help="Available models installed locally via Ollama."
+    )
 
-# 3. Force database retraining option
-force_retrain = st.sidebar.checkbox(
-    "Force Vector Database Retraining",
-    value=False,
-    help="If checked, rebuilds the vector database from files in the 'docs' folder."
-)
+    # 3. Force database retraining option
+    force_retrain = st.checkbox(
+        "Force Vector Database Retraining",
+        value=False,
+        help="If checked, rebuilds the vector database from files in the 'docs' folder."
+    )
 
-# Apply settings button
-init_button = st.sidebar.button("Apply Settings / Restart", use_container_width=True, type="primary")
+    # Apply settings button
+    init_button = st.button("Apply Settings / Restart", use_container_width=True, type="primary")
 
-# Maintenance section
-st.sidebar.markdown("---")
-st.sidebar.markdown("### Maintenance")
-clear_chat = st.sidebar.button("Clear Chat History", use_container_width=True)
-unload_models = st.sidebar.button("Free RAM (Stop Ollama)", use_container_width=True)
+# Maintenance Expander
+with st.sidebar.expander("🔧 Maintenance", expanded=False):
+    clear_chat = st.button("Clear Chat History", use_container_width=True)
+    unload_models = st.button("Free RAM (Stop Ollama)", use_container_width=True)
 
 if clear_chat:
     st.session_state.messages = []
@@ -267,6 +302,12 @@ if not st.session_state.system_initialized or init_button:
         else:
             status.update(label="Initialization failed.", state="error", expanded=True)
 
+# RAM warning alert on the main page
+st.warning(
+    "⚠️ **RAM Alert**: Please click **Free RAM** in the Maintenance menu before closing this tab. "
+    "Otherwise, Ollama models will remain loaded and continue consuming system resources."
+)  
+
 # Main header
 st.markdown("<div class='main-title'>Ollama RAG Playground</div>", unsafe_allow_html=True)
 st.markdown(f"<div class='subtitle'>Interact with the local knowledge base using AI in {st.session_state.active_mode} mode</div>", unsafe_allow_html=True)
@@ -293,7 +334,7 @@ with col3:
         <small style='color: #888;'>EMBEDDING MODEL</small><br>
         <strong>{EMBEDDING_MODEL}</strong>
     </div>
-    """, unsafe_allow_html=True)
+    """, unsafe_allow_html=True) 
 
 # Render chat history
 for message in st.session_state.messages:
